@@ -10,6 +10,7 @@ class OCR:
     def get_ocr_text_pytessearct(self):
         image = Image.open(self.image)
         ocr_text = pytesseract.image_to_string(image)
+        ocr_text = ocr_text.replace("\n", "")
 
         return ocr_text
 
@@ -23,6 +24,8 @@ class OCR:
         ocr_text = [text.description for text in response_text_annotations]
 
         ocr_text = ocr_text[0]
+        ocr_text = ocr_text.replace("\n", "")
+        ocr_text = ocr_text.replace("\\n", "")
         ocr_text = ocr_text.replace("'", "")
         ocr_text = ocr_text.replace(",", "")
 

@@ -17,24 +17,30 @@ async def get_expiry_date(file: UploadFile):
         date = None
 
         language_result = model.predict(text=ocr_text)
-        print(language_result)
+
+        language_is_german = language_result[0][0] == "__label__de"
+
+        if ocr_text is None or ocr_text == "":
+            return {"error": "No text found"}
 
         for word in ocr_text.split():
+            if language_is_german and "deckel" in word.lower():
+                print("Ablaufdatum vllt beim deckel")
+
             if len(word) > 8:
                 continue
 
-            if language_result[0][0] == "__label__de":
-                try:
-                    date = datetime.strptime(word, "%d.%M.%y").strftime("%d.%M.%Y")
+            try:
+                date = datetime.strptime(word, "%d.%M.%y").strftime("%d.%M.%Y")
 
-                except ValueError:
-                    pass
+            except ValueError:
+                pass
 
-                try:
-                    date = datetime.strptime(word, "%d.%M.%Y").strftime("%d.%M.%Y")
+            try:
+                date = datetime.strptime(word, "%d.%M.%Y").strftime("%d.%M.%Y")
 
-                except ValueError:
-                    pass
+            except ValueError:
+                pass
 
             try:
                 date = datetime.strptime(word, "%d/%M/%y").strftime("%d/%M/%Y")
@@ -52,6 +58,9 @@ async def get_expiry_date(file: UploadFile):
                 possible_dates.append(date)
 
         possible_dates.sort()
+
+        if len(possible_dates) == 0:
+            return {"error": "No date found"}
 
         return {"possible_expiry_date": possible_dates[0]}
 
